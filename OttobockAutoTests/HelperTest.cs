@@ -207,8 +207,7 @@ namespace Selenium.Test
 
                     Thread.Sleep(2000);
                 }
-
-            }        
+            }
         }
     }
 }

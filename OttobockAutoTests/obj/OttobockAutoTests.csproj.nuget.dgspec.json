@@ -1,19 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\OttobockAutoTests.csproj": {}
+    "C:\\Anthill\\ottobock\\OttobockAutoTests\\OttobockAutoTests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\OttobockAutoTests.csproj": {
+    "C:\\Anthill\\ottobock\\OttobockAutoTests\\OttobockAutoTests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\OttobockAutoTests.csproj",
+        "projectUniqueName": "C:\\Anthill\\ottobock\\OttobockAutoTests\\OttobockAutoTests.csproj",
         "projectName": "OttobockAutoTests",
-        "projectPath": "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\OttobockAutoTests.csproj",
+        "projectPath": "C:\\Anthill\\ottobock\\OttobockAutoTests\\OttobockAutoTests.csproj",
         "packagesPath": "C:\\Users\\working-pc-1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\obj\\",
+        "outputPath": "C:\\Anthill\\ottobock\\OttobockAutoTests\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
+          "C:\\Anthill\\NuGet.Config",
           "C:\\Users\\working-pc-1\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -74,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
         }
       }
     }

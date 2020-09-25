@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9Puqtsb4qfEoevZm1mL8yZqODvwm1OTqN6VUTYqPCid5CYVPgSbI+KlUNmWZn+ZHpMQcsxpNuwJrh43iLQuE+A==",
+  "dgSpecHash": "hGp96ZprI8kk6u0qH3dYdQKEd5NIBcwkojVvjgleFLJ8/IQu57ATada/GDX+z4dH7In/TB44JtFUK5k5SykHHQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\working-pc-1\\source\\repos\\OttobockAutoTests\\OttobockAutoTests\\OttobockAutoTests.csproj",
+  "projectFilePath": "C:\\Anthill\\ottobock\\OttobockAutoTests\\OttobockAutoTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\working-pc-1\\.nuget\\packages\\microsoft.codecoverage\\16.4.0\\microsoft.codecoverage.16.4.0.nupkg.sha512",
     "C:\\Users\\working-pc-1\\.nuget\\packages\\microsoft.csharp\\4.3.0\\microsoft.csharp.4.3.0.nupkg.sha512",
