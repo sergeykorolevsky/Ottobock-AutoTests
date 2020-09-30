@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
@@ -23,15 +24,15 @@ namespace Selenium.Test
         string downloadFolder;
 
         private string password;
-        private string login;               
+        private string login;
 
-        string mainURLs = "https://shop.ottobock.us/";
+        string mainURLs = "https://testshop-us.corp.ottobock.int/";
 
         [SetUp]
         public void SetUp()
         {
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var pathDrivers = directory + "/../../../../drivers/";
+            string pathDrivers = directory + "/../../../../drivers/";
 
             mainURL = mainURLs + "";
             authUrl = mainURLs + "login?referer=%2fstore%2fus01%2fen%2f";
@@ -39,7 +40,7 @@ namespace Selenium.Test
             login = "test_h1_admin@ottobock.com";
             password = "Selenium1";
 
-            downloadFolder = "C:\\Users\\working-pc-1\\Downloads\\SeleniumTests"; //folder URL where files will be downloaded
+            downloadFolder = "C:\\Users\\KOROLEVSKY\\Downloads\\SeleniumTests"; //folder URL where files will be downloaded
 
             helperTest = new HelperTest();
             ChromeOptions options = new ChromeOptions();
@@ -47,16 +48,18 @@ namespace Selenium.Test
             options.AddArguments("--no-sandbox");
             //options.AddArguments("--headless");
             options.AddArguments("--incognito");
+            options.AddArguments("--ignore-ssl-errors=yes");
+            options.AddArguments("--ignore-certificate-errors");
 
             options.AddUserProfilePreference("intl.accept_languages", "nl");
             options.AddUserProfilePreference("disable-popup-blocking", "true");
             options.AddUserProfilePreference("profile.default_content_setting_values.automatic_downloads", 1);
-            options.AddUserProfilePreference("download.default_directory", @"C:\Users\working-pc-1\Downloads\SeleniumTests");
+            options.AddUserProfilePreference("download.default_directory", @"C:\Users\KOROLEVSKY\Downloads\SeleniumTests");
 
             driver = new ChromeDriver(pathDrivers, options);
 
             driver.Manage().Cookies.DeleteAllCookies();
-            driver.Manage().Window.Size = new System.Drawing.Size(1920, 1024);
+            driver.Manage().Window.Size = new System.Drawing.Size(1900, 956);
             //driver.Manage().Window.Maximize();
         }
 
@@ -66,16 +69,14 @@ namespace Selenium.Test
 
             Thread.Sleep(1000);
 
-            helperTest.waitElementXpath(driver, 60, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li/a");
-            var SignIn = driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li/a"));
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li[2]/a");
+            var SignIn = driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li[2]/a"));
             SignIn.Click();
-
-            Assert.AreEqual(authUrl, driver.Url);
-            Assert.AreEqual("Login | Ottobock US B2B Site", driver.Title);
 
             helperTest.waitElementId(driver, 60, "j_username");
 
-            Thread.Sleep(2000);
+            Assert.AreEqual(authUrl, driver.Url);
+            Assert.AreEqual("Login | Ottobock US B2B Site", driver.Title);
 
             IWebElement InpBox = driver.FindElement(By.Id("j_username"));
             InpBox.SendKeys(login);
@@ -125,7 +126,7 @@ namespace Selenium.Test
         }
 
 
-        [Test]
+        //[Test]
         public void QuickOrder()
         {
             LoginToOttobock(driver, mainURL, authUrl, login, password, mainURL);
@@ -268,7 +269,6 @@ namespace Selenium.Test
             Assert.IsTrue(bodyTextProduct.Contains("Modular Polycentric EBS Knee"));
             Assert.IsTrue(bodyTextProduct.Contains("3R60 Vacuum"));
             Assert.IsTrue(bodyTextProduct.Contains("EBS Knee Joint For Hip"));
-            Assert.IsTrue(bodyTextProduct.Contains("EBS-PRO-Knee"));
 
             SearchBox.SendKeys(Keys.Enter);
 
@@ -280,7 +280,6 @@ namespace Selenium.Test
             Assert.IsTrue(bodyTextProduct.Contains("Modular Polycentric EBS Knee"));
             Assert.IsTrue(bodyTextProduct.Contains("3R60 Vacuum"));
             Assert.IsTrue(bodyTextProduct.Contains("EBS Knee Joint For Hip"));
-            Assert.IsTrue(bodyTextProduct.Contains("EBS-PRO-Knee"));
 
             helperTest.JsClickElement(driver, "//*[text()='" + " Modular Polycentric EBS Knee Joint" + "']");
 
@@ -299,7 +298,7 @@ namespace Selenium.Test
             helperTest.waitElementId(driver, 60, "product-references-sparepart");
             helperTest.waitElementId(driver, 60, "product-documents-section");
 
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[3]/div[7]/section/div/div/div[2]/div/div[1]/p[3]/a");
+            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[9]/div[8]/section/div/div/div[2]/div/div[1]/p[3]/a");
 
             Thread.Sleep(3000);
 
@@ -310,7 +309,7 @@ namespace Selenium.Test
         }
 
         [Test]
-        public void Order()
+        public void RequestQuotation()
         {
             //TS.US.Q.H1.2
 
@@ -319,7 +318,7 @@ namespace Selenium.Test
             string bodyTextProduct;
             string availableValue;
             string checkAvailable;
-            decimal totalPrice;            
+            decimal totalPrice;
 
             IWebElement InpBox;
             IWebElement PassBox;
@@ -327,7 +326,7 @@ namespace Selenium.Test
 
             driver.Url = mainURL + "/c/1300";
 
-            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li/a");
+            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li[2]/a");
 
             helperTest.waitElementId(driver, 60, "j_username");
 
@@ -378,37 +377,32 @@ namespace Selenium.Test
 
             //TS.US.Q.H1.3
 
-            driver.Url = mainURL + "/p/3C88-3~59~82";
+            driver.Url = mainURL + "p/1C40~5K";
 
             Thread.Sleep(3000);
 
             helperTest.waitElementId(driver, 60, "configureProduct");
 
             bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
-            Assert.IsTrue(bodyTextProduct.Contains("3C88-3=9.2"));
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=K"));
 
             helperTest.JsClickElementId(driver, "configureProduct");
             helperTest.waitElementId(driver, 60, "dynamicConfigContent");
 
-            driver.Url.Contains("/p/3C88-3~59~82/configuratorPage/CPQCONFIGURATOR");
+            driver.Url.Contains("/p/1C40~5K/configuratorPage/CPQCONFIGURATOR");
 
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[3]/div[2]/div[1]/div/input");
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[5]/div[2]/div[2]/div/input");
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[6]/div[2]/div[2]/div/input");
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[3]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[8]/ul/li[3]/div")).Click();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
-            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[7]/div[2]/input");
-            IWebElement InputBox = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[7]/div[2]/input"));
-            InputBox.Clear();
-            InputBox.SendKeys("100");
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[3]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[8]/ul/li[3]/div")).Click();
 
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[8]/div[2]/div[3]/div/input");
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[9]/div[2]/div[1]/div/input");
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[10]/div[2]/div[2]/div/input");
-            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[14]/div[2]/div[3]/div/input");
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[4]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[9]/ul/li[2]/div")).Click();
 
             Thread.Sleep(3000);
 
@@ -419,7 +413,7 @@ namespace Selenium.Test
             if (!CheckAndDeleteFile())
             {
                 Assert.Fail();
-            }            
+            }
 
             helperTest.JsClickElementId(driver, "printCurrentConfiguration");
 
@@ -428,16 +422,16 @@ namespace Selenium.Test
             if (!CheckAndDeleteFile())
             {
                 Assert.Fail();
-            }            
+            }
 
             driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[2]/div/div/div/div/div/div[2]/div[2]/div[1]/button")).Click();
 
             helperTest.waitElementId(driver, 60, "configureProduct");
 
-            driver.Url.Contains("/p/3C88-3~59~82");
+            driver.Url.Contains("/p/1C40~5K");
 
             bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
-            Assert.IsTrue(bodyTextProduct.Contains("3C88-3=9.2"));
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=K"));
 
             helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[1]/span");
 
@@ -447,11 +441,9 @@ namespace Selenium.Test
 
             bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
 
-            Assert.IsTrue(bodyTextProduct.Contains("3C2000"));
-            Assert.IsTrue(bodyTextProduct.Contains("3C98-3"));
-            Assert.IsTrue(bodyTextProduct.Contains("2R57"));
-            Assert.IsTrue(bodyTextProduct.Contains("SP-3C98-3=3"));
-            Assert.IsTrue(bodyTextProduct.Contains("646D1022=EN_US"));
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=L25-0-P/4"));
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=L25-0-P/0"));
+            Assert.IsTrue(bodyTextProduct.Contains("2C4=L25/4"));
 
             //TS.US.Q.H1.4            
 
@@ -487,11 +479,10 @@ namespace Selenium.Test
             driver.Url.Contains("cart");
 
             bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
-
             Assert.IsTrue(bodyTextProduct.Contains("Bending Iron"));
             Assert.IsTrue(bodyTextProduct.Contains("Shoemaker's Hammer"));
 
-            CheckQuantity = driver.FindElement(By.Id("quantity_5"));
+            CheckQuantity = driver.FindElement(By.Id("quantity_3"));
             var Quantity1 = Convert.ToInt32(CheckQuantity.GetAttribute("value"));
             Assert.AreEqual(Quantity1, 2);
 
@@ -501,14 +492,11 @@ namespace Selenium.Test
             decimal checkTotalPrice = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[4]/div[2]/div/div/div/div[6]/div/span")).Text.Replace("$", ""));
             Assert.AreEqual(totalPrice, checkTotalPrice);
 
-            var totalPriceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[5]/div[6]")).Text.Replace("$", ""));
-            var totalPriceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[7]/div[6]")).Text.Replace("$", ""));
-            var totalPriceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[9]/div[6]")).Text.Replace("$", ""));
-            var totalPriceItem4 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[11]/div[6]")).Text.Replace("$", ""));
-            var totalPriceItem5 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[13]/div[6]")).Text.Replace("$", ""));
-            var totalPriceItem6 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[15]/div[6]")).Text.Replace("$", ""));
+            var totalPriceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[6]")).Text.Replace("$", ""));
+            var totalPriceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[6]")).Text.Replace("$", ""));
+            var totalPriceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[10]/div[6]")).Text.Replace("$", ""));
 
-            var sumTotalPriceItem = totalPriceItem1 + totalPriceItem2 + totalPriceItem3 + totalPriceItem4 + totalPriceItem5 + totalPriceItem6;
+            var sumTotalPriceItem = totalPriceItem1 + totalPriceItem2 + totalPriceItem3;
 
             Assert.AreEqual(totalPrice, sumTotalPriceItem);
 
@@ -516,14 +504,11 @@ namespace Selenium.Test
 
             decimal price = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[4]/div[2]/div/div/div/div[2]/div/span")).Text.Replace("$", ""));
 
-            var priceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[5]/div[4]")).Text.Replace("$", ""));
-            var priceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[7]/div[4]")).Text.Replace("$", ""));
-            var priceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[9]/div[4]")).Text.Replace("$", ""));
-            var priceItem4 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[11]/div[4]")).Text.Replace("$", ""));
-            var priceItem5 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[13]/div[4]")).Text.Replace("$", ""));
-            var priceItem6 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[15]/div[4]")).Text.Replace("$", ""));
+            var priceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[4]")).Text.Replace("$", ""));
+            var priceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[4]")).Text.Replace("$", ""));
+            var priceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[10]/div[4]")).Text.Replace("$", ""));
 
-            var sumPriceItem = priceItem1 + priceItem2 + priceItem3 + priceItem4 + (priceItem5 * 2) + priceItem6;
+            var sumPriceItem = priceItem1 + (priceItem2 * 2) + priceItem3;
 
             Assert.AreEqual(price, sumPriceItem);
 
@@ -535,11 +520,11 @@ namespace Selenium.Test
 
             Assert.AreEqual(totalSaving, priceSaving);
 
-            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[13]/div[5]/form/div[1]/span[1]")).Click();
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[5]/form/div[1]/span[1]")).Click();
 
             Thread.Sleep(3000);
 
-            CheckQuantity = driver.FindElement(By.Id("quantity_5"));
+            CheckQuantity = driver.FindElement(By.Id("quantity_3"));
             var ChangeQuantity = Convert.ToInt32(CheckQuantity.GetAttribute("value"));
             Assert.AreEqual(ChangeQuantity, 1);
 
@@ -553,7 +538,7 @@ namespace Selenium.Test
             if (!CheckAndDeleteFile())
             {
                 Assert.Fail();
-            }            
+            }
 
             driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/button")).Click();
             driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/ul/li[2]/a")).Click();
@@ -569,31 +554,25 @@ namespace Selenium.Test
             var RemoveItem = driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[7]/div/form/button/span"));
             RemoveItem.Click();
 
-            Thread.Sleep(5000);
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[1]/div[1]");
 
             bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
-
-            Assert.IsFalse(bodyTextProduct.Contains("3C2000"));
-            Assert.IsFalse(bodyTextProduct.Contains("3C98-3"));
-            Assert.IsFalse(bodyTextProduct.Contains("2R57"));
-            Assert.IsFalse(bodyTextProduct.Contains("SP-3C98-3=3"));
-            Assert.IsFalse(bodyTextProduct.Contains("646D1022=EN_US"));
-        }
-
-        [Test]
-        public void CheckOut()
-        {
-            //TS.US.Q.H1.6
-
-            LoginToOttobock(driver, mainURL, authUrl, login, password, mainURL);
+            Assert.IsFalse(bodyTextProduct.Contains("1C40=L25-0-P/4"));
+            Assert.IsFalse(bodyTextProduct.Contains("1C40=L25-0-P/0"));
+            Assert.IsFalse(bodyTextProduct.Contains("2C4=L25/4"));
 
             Thread.Sleep(2000);
+
+            //TS.US.Q.H1.6
 
             helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[1]/span");
 
             helperTest.waitElementId(driver, 60, "cartEntryActionForm");
             driver.Url.Contains("cart");
 
+            Thread.Sleep(2000);
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[3]/div[5]/div/div[1]/div/div/button");
             driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[1]/div/div/button")).Click();
 
             helperTest.waitElementId(driver, 60, "selectcc");
@@ -613,13 +592,14 @@ namespace Selenium.Test
             helperTest.UseDropDownIdByName(driver, "cardExpYear", "2040");
             helperTest.InputStringId(driver, "123", "cvvNumber");
             helperTest.InputStringId(driver, "Selenium Card Holder", "inputBillToFirstName");
-            helperTest.InputStringId(driver, "Test-" + DateTime.Now.ToString("yyyy-MM-dd"), "inputBillToLastName");
+            helperTest.InputStringId(driver, "Test-" + DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss"), "inputBillToLastName");
             helperTest.InputStringId(driver, "11501 Alterra Pkwy Ste 600", "inputBillToStreet1");
             helperTest.InputStringId(driver, "Austin", "inputBillToCity");
             helperTest.UseDropDownIdByName(driver, "inputBillToCountry", "United States");
             helperTest.UseDropDownIdByName(driver, "inputBillToState", "Texas");
             helperTest.InputStringId(driver, "78758", "billToPostCode");
             helperTest.InputStringId(driver, "TEST", "inputBillToCompany");
+            helperTest.InputStringId(driver, "", "inputBillToPhone");
 
             Thread.Sleep(1000);
 
@@ -629,7 +609,475 @@ namespace Selenium.Test
             helperTest.waitElementId(driver, 60, "responseFormSubmitButton");
             driver.FindElement(By.Id("responseFormSubmitButton")).Click();
 
+            Thread.Sleep(2000);
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/div/section/ul/li[last()]/aside/button")).Click();
+
             Thread.Sleep(1000);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[1]/div[2]/a[1]/div[1]")).Click();
+
+            Thread.Sleep(1000);
+
+            helperTest.InputStringId(driver, "Selenium Test - " + DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss"), "PurchaseOrderNumber");
+
+            driver.FindElement(By.Id("choosePaymentType_continue_button")).Click();
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[1]/div[2]/div/div/div[2]/button")).Click();
+
+            driver.FindElement(By.Id("newAddressDialogButton")).Click();
+
+            helperTest.waitElementId(driver, 60, "address.firstName_del");
+
+            helperTest.InputStringId(driver, "Test", "address.firstName_del");
+            helperTest.InputStringId(driver, "Selenium", "address.surname_del");
+            helperTest.InputStringId(driver, "1234 Test Lane", "address.line1_del");
+            helperTest.InputStringId(driver, "Austin", "address.townCity_del");
+            helperTest.InputStringId(driver, "78758", "address.postcode_del");
+            helperTest.UseDropDownIdByName(driver, "regionSelectBox", "Texas");
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/form/div[2]/button")).Click();
+
+            driver.FindElement(By.Id("deliveryMethodSubmit")).Click();
+
+            helperTest.waitElementId(driver, 60, "placeInquiry");
+            driver.Url.Contains("view");
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[1]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1111"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[2]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Selenium Test - " + DateTime.Now.ToString("yyyy-MM-dd")));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Test Selenium"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1234 Test Lane"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Austin, TX 78758"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("United States of America"));
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+
+            Assert.IsTrue(bodyTextProduct.Contains("711S1=6X4"));
+            Assert.IsTrue(bodyTextProduct.Contains("705S2=350"));
+            Assert.IsTrue(bodyTextProduct.Contains("SHG"));
+
+            //TS.US.Q.H1.7
+
+            driver.FindElement(By.Id("placeInquiry")).Click();
+
+            Thread.Sleep(1000);
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/form/div[2]/input")).Click();
+
+            Thread.Sleep(1000);
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+
+            Assert.IsTrue(bodyTextProduct.Contains("Thank you for creating a quote!"));
+            driver.Url.Contains("Confirmation");
+        }
+
+        [Test]
+        public void Order()
+        {
+            //TS.US.Q.H1.2
+
+            string priceDisplayed;
+            string addToCartButton;
+            string bodyTextProduct;
+            string availableValue;
+            string checkAvailable;
+            decimal totalPrice;
+
+            IWebElement InpBox;
+            IWebElement PassBox;
+            IWebElement CheckQuantity;
+
+            driver.Url = mainURL + "/c/1300";
+
+            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li[2]/a");
+
+            helperTest.waitElementId(driver, 60, "j_username");
+
+            Thread.Sleep(2000);
+
+            InpBox = driver.FindElement(By.Id("j_username"));
+            InpBox.SendKeys(login);
+
+            PassBox = driver.FindElement(By.Id("j_password"));
+            PassBox.SendKeys(password);
+
+            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[1]/div/div/div/form/button");
+
+            helperTest.waitElementId(driver, 60, "dLabel");
+            driver.Url.Contains("/c/1300");
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li/a");
+            var SignIn = driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li/a"));
+            SignIn.Click();
+
+            Thread.Sleep(3000);
+
+            driver.Url = mainURL + "/p/3R60";
+
+            helperTest.JsClickElementId(driver, "addToCartButton");
+            helperTest.waitElementId(driver, 60, "j_username");
+
+            Thread.Sleep(2000);
+
+            InpBox = driver.FindElement(By.Id("j_username"));
+            InpBox.SendKeys(login);
+
+            PassBox = driver.FindElement(By.Id("j_password"));
+            PassBox.SendKeys(password);
+
+            helperTest.JsClickElement(driver, "/html/body/main/div[3]/div/div[1]/div/div/div/form/button");
+
+            helperTest.waitElementId(driver, 60, "dLabel");
+            driver.Url.Contains("/p/3R60");
+
+            priceDisplayed = driver.FindElement(By.XPath("/html/body/main/div[3]/div/section/div/div[3]/div/div/div/div/p")).Text;
+            Assert.IsNotEmpty(priceDisplayed);
+
+            addToCartButton = driver.FindElement(By.Id("addToCartButton")).Text;
+            Assert.AreEqual(addToCartButton, "ADD TO CART");
+
+            Thread.Sleep(2000);
+
+            //TS.US.Q.H1.3
+
+            driver.Url = mainURL + "p/1C40~5K";
+
+            Thread.Sleep(3000);
+
+            helperTest.waitElementId(driver, 60, "configureProduct");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=K"));
+
+            helperTest.JsClickElementId(driver, "configureProduct");
+            helperTest.waitElementId(driver, 60, "dynamicConfigContent");
+
+            driver.Url.Contains("/p/1C40~5K/configuratorPage/CPQCONFIGURATOR");
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[3]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[8]/ul/li[3]/div")).Click();
+
+            Thread.Sleep(2000);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[3]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[8]/ul/li[3]/div")).Click();
+
+            Thread.Sleep(2000);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/div/form/div[1]/div[2]/div[4]/div[2]/span/div")).Click();
+            driver.FindElement(By.XPath("/html/body/div[9]/ul/li[2]/div")).Click();
+
+            Thread.Sleep(3000);
+
+            helperTest.JsClickElementId(driver, "exportCSV");
+
+            Thread.Sleep(3000);
+
+            if (!CheckAndDeleteFile())
+            {
+                Assert.Fail();
+            }
+
+            helperTest.JsClickElementId(driver, "printCurrentConfiguration");
+
+            Thread.Sleep(3000);
+
+            if (!CheckAndDeleteFile())
+            {
+                Assert.Fail();
+            }
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[2]/div/div/div/div/div/div[2]/div[2]/div[1]/button")).Click();
+
+            helperTest.waitElementId(driver, 60, "configureProduct");
+
+            driver.Url.Contains("/p/1C40~5K");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=K"));
+
+            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[1]/span");
+
+            helperTest.waitElementId(driver, 60, "cartEntryActionForm");
+
+            driver.Url.Contains("cart");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=L25-0-P/4"));
+            Assert.IsTrue(bodyTextProduct.Contains("1C40=L25-0-P/0"));
+            Assert.IsTrue(bodyTextProduct.Contains("2C4=L25/4"));
+
+            //TS.US.Q.H1.4            
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[1]/a/div");
+            var QuickOrderButton = driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[1]/a/div"));
+            QuickOrderButton.Click();
+
+            Thread.Sleep(3000);
+
+            driver.Url.Contains("quickOrder");
+
+            InputAndCheckAdd("711S1=6X4", 2, "Bending Iron");
+            InputAndCheckAdd("711s1=6x4", 3, "Bending Iron");
+            InputAndCheckAdd("705S2=350", 4, "Shoemaker's Hammer");
+
+            priceDisplayed = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div/div[3]/ul/li[2]/div[4]")).Text;
+            Assert.IsNotEmpty(priceDisplayed);
+            priceDisplayed = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div/div[3]/ul/li[3]/div[4]")).Text;
+            Assert.IsNotEmpty(priceDisplayed);
+            priceDisplayed = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div/div[3]/ul/li[4]/div[4]")).Text;
+            Assert.IsNotEmpty(priceDisplayed);
+
+            availableValue = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div/div[3]/ul/li[2]/div[3]/div/span")).Text;
+            checkAvailable = driver.FindElement(By.XPath("/html/body/main/div[3]/div/div/div[3]/ul/li[3]/div[3]/div/span")).Text;
+            Assert.IsTrue(checkAvailable.Contains(availableValue));
+
+            helperTest.JsClickElementId(driver, "js-add-to-cart-quick-order-btn-top");
+
+            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[1]/span");
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[3]/a/span");
+
+            driver.Url.Contains("cart");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Bending Iron"));
+            Assert.IsTrue(bodyTextProduct.Contains("Shoemaker's Hammer"));
+
+            CheckQuantity = driver.FindElement(By.Id("quantity_3"));
+            var Quantity1 = Convert.ToInt32(CheckQuantity.GetAttribute("value"));
+            Assert.AreEqual(Quantity1, 2);
+
+            //TS.US.Q.H1.5
+
+            totalPrice = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[2]")).Text.Replace("$", ""));
+            decimal checkTotalPrice = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[4]/div[2]/div/div/div/div[6]/div/span")).Text.Replace("$", ""));
+            Assert.AreEqual(totalPrice, checkTotalPrice);
+
+            var totalPriceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[6]")).Text.Replace("$", ""));
+            var totalPriceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[6]")).Text.Replace("$", ""));
+            var totalPriceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[10]/div[6]")).Text.Replace("$", ""));
+
+            var sumTotalPriceItem = totalPriceItem1 + totalPriceItem2 + totalPriceItem3;
+
+            Assert.AreEqual(totalPrice, sumTotalPriceItem);
+
+            Thread.Sleep(1000);
+
+            decimal price = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[4]/div[2]/div/div/div/div[2]/div/span")).Text.Replace("$", ""));
+
+            var priceItem1 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[4]")).Text.Replace("$", ""));
+            var priceItem2 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[4]")).Text.Replace("$", ""));
+            var priceItem3 = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[10]/div[4]")).Text.Replace("$", ""));
+
+            var sumPriceItem = priceItem1 + (priceItem2 * 2) + priceItem3;
+
+            Assert.AreEqual(price, sumPriceItem);
+
+            Thread.Sleep(1000);
+
+            decimal totalSaving = Convert.ToDecimal(driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[4]/div[2]/div/div/div/div[3]/div")).Text.Replace("- $", ""));
+
+            var priceSaving = sumPriceItem - sumTotalPriceItem;
+
+            Assert.AreEqual(totalSaving, priceSaving);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[8]/div[5]/form/div[1]/span[1]")).Click();
+
+            Thread.Sleep(3000);
+
+            CheckQuantity = driver.FindElement(By.Id("quantity_3"));
+            var ChangeQuantity = Convert.ToInt32(CheckQuantity.GetAttribute("value"));
+            Assert.AreEqual(ChangeQuantity, 1);
+
+            Thread.Sleep(1000);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/button")).Click();
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/ul/li[1]/a")).Click();
+
+            Thread.Sleep(3000);
+
+            if (!CheckAndDeleteFile())
+            {
+                Assert.Fail();
+            }
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/button")).Click();
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[2]/div/div[2]/div/ul/li[2]/a")).Click();
+
+            Thread.Sleep(3000);
+
+            if (!CheckAndDeleteFile())
+            {
+                Assert.Fail();
+            }
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[7]/div/form/button/span");
+            var RemoveItem = driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[1]/div/ul/li[2]/div[7]/div/form/button/span"));
+            RemoveItem.Click();
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[1]/div[1]");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+            Assert.IsFalse(bodyTextProduct.Contains("1C40=L25-0-P/4"));
+            Assert.IsFalse(bodyTextProduct.Contains("1C40=L25-0-P/0"));
+            Assert.IsFalse(bodyTextProduct.Contains("2C4=L25/4"));
+
+            Thread.Sleep(2000);
+
+            //TS.US.Q.H1.6
+
+            helperTest.JsClickElement(driver, "/html/body/main/header/nav[1]/div/div[2]/div[3]/ul/li[3]/div/div[2]/div[1]/a/div[1]/span");
+
+            helperTest.waitElementId(driver, 60, "cartEntryActionForm");
+            driver.Url.Contains("cart");
+
+            Thread.Sleep(2000);
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div[3]/div[5]/div/div[1]/div/div/button");
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[3]/div[5]/div/div[1]/div/div/button")).Click();
+
+            helperTest.waitElementId(driver, 60, "selectcc");
+            driver.Url.Contains("/checkout/multi/payment-type/choose");
+
+            driver.FindElement(By.Id("selectcc")).Click();
+            helperTest.waitElementId(driver, 60, "creditCardSelection");
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/div/section/div/a")).Click();
+
+            helperTest.waitElementId(driver, 60, "tokenButton");
+            driver.Url.Contains("prgwin.paymentsradius.com/PaymentsRadiusDI/v2/checkOut.do");
+
+            helperTest.UseDropDownIdByName(driver, "inputCardType", "Visa");
+            helperTest.InputStringId(driver, "4111111111111111", "cardNo1");
+            helperTest.UseDropDownIdByName(driver, "cardExpMonth", "12");
+            helperTest.UseDropDownIdByName(driver, "cardExpYear", "2040");
+            helperTest.InputStringId(driver, "123", "cvvNumber");
+            helperTest.InputStringId(driver, "Selenium Card Holder", "inputBillToFirstName");
+            helperTest.InputStringId(driver, "Test-" + DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss"), "inputBillToLastName");
+            helperTest.InputStringId(driver, "11501 Alterra Pkwy Ste 600", "inputBillToStreet1");
+            helperTest.InputStringId(driver, "Austin", "inputBillToCity");
+            helperTest.UseDropDownIdByName(driver, "inputBillToCountry", "United States");
+            helperTest.UseDropDownIdByName(driver, "inputBillToState", "Texas");
+            helperTest.InputStringId(driver, "78758", "billToPostCode");
+            helperTest.InputStringId(driver, "TEST", "inputBillToCompany");
+            helperTest.InputStringId(driver, "", "inputBillToPhone");
+
+            Thread.Sleep(1000);
+
+            driver.FindElement(By.Id("tokenButton")).Click();
+
+            Thread.Sleep(1000);
+            helperTest.waitElementId(driver, 60, "responseFormSubmitButton");
+            driver.FindElement(By.Id("responseFormSubmitButton")).Click();
+
+            Thread.Sleep(2000);
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/div/section/ul/li[last()]/aside/button")).Click();
+
+            Thread.Sleep(1000);
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[1]/div[2]/a[1]/div[1]")).Click();
+
+            Thread.Sleep(1000);
+
+            helperTest.InputStringId(driver, "Selenium Test - " + DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss"), "PurchaseOrderNumber");
+
+            driver.FindElement(By.Id("choosePaymentType_continue_button")).Click();
+
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[1]/div[2]/div/div/div[2]/button")).Click();
+
+            driver.FindElement(By.Id("newAddressDialogButton")).Click();
+
+            helperTest.waitElementId(driver, 60, "address.firstName_del");
+
+            helperTest.InputStringId(driver, "Test", "address.firstName_del");
+            helperTest.InputStringId(driver, "Selenium", "address.surname_del");
+            helperTest.InputStringId(driver, "1234 Test Lane", "address.line1_del");
+            helperTest.InputStringId(driver, "Austin", "address.townCity_del");
+            helperTest.InputStringId(driver, "78758", "address.postcode_del");
+            helperTest.UseDropDownIdByName(driver, "regionSelectBox", "Texas");
+
+            driver.FindElement(By.XPath("/html/body/div[5]/div[1]/div[2]/div[2]/div[1]/div/form/div[2]/button")).Click();
+
+            driver.FindElement(By.Id("deliveryMethodSubmit")).Click();
+
+            helperTest.waitElementId(driver, 60, "placeInquiry");
+            driver.Url.Contains("view");
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[1]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1111"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[2]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Selenium Test - " + DateTime.Now.ToString("yyyy-MM-dd")));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Test Selenium"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("1234 Test Lane"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Austin, TX 78758"));
+
+            bodyTextProduct = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div[2]/div[2]/ul[1]/li[3]/div[2]")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("United States of America"));
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+
+            Assert.IsTrue(bodyTextProduct.Contains("711S1=6X4"));
+            Assert.IsTrue(bodyTextProduct.Contains("705S2=350"));
+            Assert.IsTrue(bodyTextProduct.Contains("SHG"));
+
+            //TS.US.Q.H1.7
+
+            driver.FindElement(By.Id("placeOrderForm1")).Click();
+
+            helperTest.waitElementId(driver, 60, "accept-terms-button");
+            driver.FindElement(By.Id("accept-terms-button")).Click();
+
+            helperTest.waitElementId(driver, 60, "dLabel");
+
+            bodyTextProduct = driver.FindElement(By.TagName("body")).Text;
+            Assert.IsTrue(bodyTextProduct.Contains("Thank you for your Order!"));
+            driver.Url.Contains("orderConfirmation");
+
+            string orderNumber = driver.FindElement(By.XPath("/html/body/main/div[3]/div[2]/div/div[2]/div/div/div[1]/div/div[1]/div[2]/span")).Text;
+
+            driver.FindElement(By.Id("dLabel")).Click();
+            driver.FindElement(By.XPath("/html/body/main/header/nav[1]/div/div[2]/div[2]/div/ul/li[2]/div[1]/ul/li[3]/a")).Click();
+
+            Thread.Sleep(3000);
+
+            driver.Url.Contains("my-account/orders");
+
+            helperTest.JsClickElement(driver, "//*[text()='" + (orderNumber) + "']");
+
+            helperTest.waitElementXpath(driver, 60, "/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/a");
+            driver.FindElement(By.XPath("/html/body/main/div[3]/div/div[2]/div[3]/div[1]/div[2]/a")).Click();
+
+            var browserTabs = driver.WindowHandles;
+            driver.SwitchTo().Window(browserTabs[1]);
+
+            Thread.Sleep(3000);
+
+            driver.Url.Contains("/pdf/order/" + (orderNumber));
+
+            driver.Close();
+            driver.SwitchTo().Window(browserTabs[0]);
         }
 
         public static String GetTimestamp(DateTime value)
@@ -642,7 +1090,7 @@ namespace Selenium.Test
             var directoryInfo = new DirectoryInfo(downloadFolder);
             var fileInfo = directoryInfo.GetFiles()?.OrderByDescending(p => p.CreationTime)?.FirstOrDefault();
             if (fileInfo != null)
-            {                
+            {
                 File.Delete(fileInfo.FullName);
                 return true;
             }
@@ -659,7 +1107,3 @@ namespace Selenium.Test
         }
     }
 }
-
-
-
-
